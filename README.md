@@ -1,0 +1,2 @@
+列出常用的spring-data-jpa实体之间关系使用场景
+包括OneToOne OneToMany ManyToOne ManyToMany等
