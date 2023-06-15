@@ -121,5 +121,9 @@ public class ManyToManyWebController {
         return manyToManyService.findCourseWhereJoniTableById(id);
     }
 
+    @GetMapping(value = "course/where-join-table/title")
+    public CourseAssociationStudentDto findCourseWhereJoniTableByTitle(@RequestParam String title) {
+        return manyToManyService.findCourseWhereJoniTableByTitle(title);
+    }
 
 }

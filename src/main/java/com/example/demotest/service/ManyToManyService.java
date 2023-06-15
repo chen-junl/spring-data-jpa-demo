@@ -1,6 +1,7 @@
 package com.example.demotest.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import com.example.demotest.dto.association.CourseAssociationStudentDto;
 import com.example.demotest.dto.association.StudentAssociationCourseDto;
 import com.example.demotest.entity.many_to_many.attribute.cascade.CourseManyToManyAttributeCascade0Entity;
@@ -167,25 +168,51 @@ public class ManyToManyService {
     }
 
 
+    /**
+     * 使用where
+     *
+     * @param id
+     * @return
+     */
     public CourseAssociationStudentDto findCourseWhereById(Integer id) {
-        //使用Where生成的sql
-        //select students0_.course_id as course_i1_1_0_, students0_.student_id as student_2_1_0_, studentman1_.id as id1_2_1_, studentman1_.creator as creator2_2_1_, studentman1_.gmt_create as gmt_crea3_2_1_, studentman1_.gmt_modified as gmt_modi4_2_1_, studentman1_.is_delete as is_delet5_2_1_, studentman1_.modifier as modifier6_2_1_, studentman1_.sort_index as sort_ind7_2_1_, studentman1_.title as title8_2_1_ from course_student students0_ inner join student studentman1_ on students0_.student_id=studentman1_.id and ( ( studentman1_.is_delete=0 ) and ( studentman1_.gmt_create >'2023-06-02 10:49:46' )) where students0_.course_id=?
+        //使用Where生成的sql 发现条件是加在目标表student上面
+        //select coursemany0_.id as id1_0_0_, coursemany0_.creator as creator2_0_0_, coursemany0_.gmt_create as gmt_crea3_0_0_, coursemany0_.gmt_modified as gmt_modi4_0_0_, coursemany0_.is_delete as is_delet5_0_0_, coursemany0_.modifier as modifier6_0_0_, coursemany0_.sort_index as sort_ind7_0_0_, coursemany0_.title as title8_0_0_ from course coursemany0_ where coursemany0_.id=? and ( coursemany0_.is_delete=0)
         CourseManyToManyWhereEntity entity = courseManyToManyWhereEntityRepository.findById(id).orElse(null);
         return BeanUtil.copyProperties(entity, CourseAssociationStudentDto.class);
+        //select students0_.course_id as course_i1_1_0_, students0_.student_id as student_2_1_0_, studentman1_.id as id1_2_1_, studentman1_.creator as creator2_2_1_, studentman1_.gmt_create as gmt_crea3_2_1_, studentman1_.gmt_modified as gmt_modi4_2_1_, studentman1_.is_delete as is_delet5_2_1_, studentman1_.modifier as modifier6_2_1_, studentman1_.sort_index as sort_ind7_2_1_, studentman1_.title as title8_2_1_ from course_student students0_ inner join student studentman1_ on students0_.student_id=studentman1_.id and ( ( studentman1_.is_delete=0 ) and ( studentman1_.gmt_create >'2023-06-02 10:49:46' )) where students0_.course_id=?
     }
 
     /**
-     * 和Where对比
-     * 两者获取结果相同,
+     * 使用whereJonTable
      *
      * @param id
      * @return
      */
     public CourseAssociationStudentDto findCourseWhereJoniTableById(Integer id) {
-        //使用WhereJoniTable生成的sql,获得结果相同,不同的是Where的查询条件是加在SQL最后,WhereJoniTable的条件是加在并表的时候,优化了并表产生的笛卡尔积大小
-        //select students0_.course_id as course_i1_1_0_, students0_.student_id as student_2_1_0_, studentman1_.id as id1_2_1_, studentman1_.creator as creator2_2_1_, studentman1_.gmt_create as gmt_crea3_2_1_, studentman1_.gmt_modified as gmt_modi4_2_1_, studentman1_.is_delete as is_delet5_2_1_, studentman1_.modifier as modifier6_2_1_, studentman1_.sort_index as sort_ind7_2_1_, studentman1_.title as title8_2_1_ from course_student students0_ inner join student studentman1_ on students0_.student_id=studentman1_.id and ( studentman1_.is_delete=0) where ( students0_.gmt_create >'2023-06-02 10:49:46') and students0_.course_id=?
+        //使用WhereJonTable生成的sql 发现条件是加在中间表course_student上面
+        //select coursemany0_.id as id1_0_0_, coursemany0_.creator as creator2_0_0_, coursemany0_.gmt_create as gmt_crea3_0_0_, coursemany0_.gmt_modified as gmt_modi4_0_0_, coursemany0_.is_delete as is_delet5_0_0_, coursemany0_.modifier as modifier6_0_0_, coursemany0_.sort_index as sort_ind7_0_0_, coursemany0_.title as title8_0_0_ from course coursemany0_ where coursemany0_.id=? and ( coursemany0_.is_delete=0)
         CourseManyToManyWhereJoinTableEntity entity = courseManyToManyWhereJoinTableEntityRepository.findById(id).orElse(null);
         return BeanUtil.copyProperties(entity, CourseAssociationStudentDto.class);
+        //select students0_.course_id as course_i1_1_0_, students0_.student_id as student_2_1_0_, studentman1_.id as id1_2_1_, studentman1_.creator as creator2_2_1_, studentman1_.gmt_create as gmt_crea3_2_1_, studentman1_.gmt_modified as gmt_modi4_2_1_, studentman1_.is_delete as is_delet5_2_1_, studentman1_.modifier as modifier6_2_1_, studentman1_.sort_index as sort_ind7_2_1_, studentman1_.title as title8_2_1_ from course_student students0_ inner join student studentman1_ on students0_.student_id=studentman1_.id and ( studentman1_.is_delete=0) where ( students0_.gmt_create >'2023-06-02 10:49:46') and students0_.course_id=?
+    }
+
+    /**
+     * 使用whereJonTable+query查询
+     *
+     * @param title
+     * @return
+     */
+    public CourseAssociationStudentDto findCourseWhereJoniTableByTitle(String title) {
+        //select coursemany0_.id as id1_0_, coursemany0_.creator as creator2_0_, coursemany0_.gmt_create as gmt_crea3_0_, coursemany0_.gmt_modified as gmt_modi4_0_, coursemany0_.is_delete as is_delet5_0_, coursemany0_.modifier as modifier6_0_, coursemany0_.sort_index as sort_ind7_0_, coursemany0_.title as title8_0_ from course coursemany0_ where ( coursemany0_.is_delete=0) and coursemany0_.title=?
+        CourseManyToManyWhereJoinTableEntity entity = CollUtil.getFirst(courseManyToManyWhereJoinTableEntityRepository.findByTitle(title));
+        //select coursemany0_.id as id1_0_, coursemany0_.creator as creator2_0_, coursemany0_.gmt_create as gmt_crea3_0_, coursemany0_.gmt_modified as gmt_modi4_0_, coursemany0_.is_delete as is_delet5_0_, coursemany0_.modifier as modifier6_0_, coursemany0_.sort_index as sort_ind7_0_, coursemany0_.title as title8_0_ from course coursemany0_ where ( coursemany0_.is_delete=0) and coursemany0_.title=?
+        CourseManyToManyWhereJoinTableEntity entity2 = CollUtil.getFirst(courseManyToManyWhereJoinTableEntityRepository.findByTitleQuery(title));
+        //SELECT * FROM course WHERE title =?
+        CourseManyToManyWhereJoinTableEntity entity3 = CollUtil.getFirst(courseManyToManyWhereJoinTableEntityRepository.findByTitleQueryNative(title));
+        //select coursemany0_.id as id1_0_, coursemany0_.creator as creator2_0_, coursemany0_.gmt_create as gmt_crea3_0_, coursemany0_.gmt_modified as gmt_modi4_0_, coursemany0_.is_delete as is_delet5_0_, coursemany0_.modifier as modifier6_0_, coursemany0_.sort_index as sort_ind7_0_, coursemany0_.title as title8_0_ from course coursemany0_ left outer join student studentman1_ on (studentman1_.gmt_create>'2021-06-02 10:49:46') where ( coursemany0_.is_delete=0) and coursemany0_.title=?
+        //CourseManyToManyWhereJoinTableEntity entity4 = CollUtil.getFirst(courseManyToManyWhereJoinTableEntityRepository.findByTitleQuery2(title));
+        return BeanUtil.copyProperties(entity, CourseAssociationStudentDto.class);
+        //select students0_.course_id as course_i1_1_0_, students0_.student_id as student_2_1_0_, studentman1_.id as id1_2_1_, studentman1_.creator as creator2_2_1_, studentman1_.gmt_create as gmt_crea3_2_1_, studentman1_.gmt_modified as gmt_modi4_2_1_, studentman1_.is_delete as is_delet5_2_1_, studentman1_.modifier as modifier6_2_1_, studentman1_.sort_index as sort_ind7_2_1_, studentman1_.title as title8_2_1_ from course_student students0_ inner join student studentman1_ on students0_.student_id=studentman1_.id and ( studentman1_.is_delete=0) where ( students0_.gmt_create >'2023-06-02 10:49:46') and students0_.course_id=?
     }
 
 }
